@@ -1,0 +1,138 @@
+// ============================================================================
+// (C) Copyright Schalk W. Cronje 2013
+//
+// This software is licensed under the Apache License 2.0
+// See http://www.apache.org/licenses/LICENSE-2.0 for license details
+//
+// Unless required by applicable law or agreed to in writing, software distributed under the License is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and limitations under the License.
+//
+// ============================================================================
+
+apply plugin : 'eclipse'
+apply plugin : 'idea'
+apply plugin : 'jenkins'
+apply plugin : 'project-report'
+
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+      }
+      dependencies {
+        classpath 'org.ysb33r.gradle:bintray:1.0'
+        classpath 'net.saliman:gradle-cobertura-plugin:2.2.2'
+        classpath 'com.terrafolio:gradle-jenkins-plugin:0.3.1'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.2.3'
+      }
+}
+
+subprojects {
+
+    version = '0.1-SNAPSHOT'
+
+    ext {
+        bintrayRepo = 'grysb33r'
+        bintrayUser = 'ysb33r'
+    }
+
+}
+
+configure(subprojects.findAll {it.name != 'jlan'}) {
+
+    apply plugin: 'bintray-publish'
+    apply plugin: 'groovy'
+    apply plugin: 'maven'
+    apply plugin: 'artifactory'
+    apply plugin: 'cobertura'
+
+    sourceCompatibility = 1.7
+
+    // Currently CodeNarc fails when used with JDK8.
+    if (!org.gradle.internal.SystemProperties.javaVersion.startsWith('1.8.') && !it.name=='smb-provider') {
+        apply plugin: 'codenarc'
+
+        codenarcTest {
+            onlyIf { false }
+        }
+    }
+
+    repositories {
+        jcenter()
+        maven { url 'http://repository.codehaus.org' }
+        maven { url 'https://oss.jfrog.org/artifactory/repo' }
+        mavenLocal()
+    }
+
+    dependencies {
+        compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.5+'
+        compile 'org.apache.commons:commons-vfs2:2.0'
+        testCompile 'org.apache.ftpserver:ftpserver-core:1.0.6'
+        testCompile 'commons-io:commons-io:2.4'
+        testCompile 'commons-net:commons-net:3.+'
+        testRuntime 'commons-httpclient:commons-httpclient:3.1'
+        testRuntime 'org.slf4j:slf4j-simple:1.7.5'
+
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar) {
+        description "An archive of the JavaDocs for Maven Central"
+        classifier "javadoc"
+        from javadoc
+    }
+
+    cobertura {
+        format = 'xml'
+        includes = ['main/**/*.java', 'main/**/*.groovy']
+    }
+
+    artifacts {
+        archives sourcesJar, javadocJar
+    }
+
+    artifactory {
+        publish {
+            contextUrl = 'http://oss.jfrog.org'
+            repository {
+                repoKey = 'oss-snapshot-local'
+                username = project.properties.bintrayUserName
+                password = project.properties.bintrayApiKey
+            }
+        }
+    }
+
+    artifactoryPublish {
+        onlyIf { version.endsWith("SNAPSHOT") }
+    }
+
+}
+
+/*
+jenkins {
+    servers {
+        "DEV@Cloud" {
+            url cloudbeesJenkinsUrl
+            secure true
+            username cloudbeesUserName
+            password cloudbeesPassword
+        }
+    }    
+    
+    defaultServer servers."DEV@Cloud"
+    
+    jobs {
+        
+    }
+    
+}
+*/
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.11'
+}
