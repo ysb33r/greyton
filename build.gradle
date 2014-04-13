@@ -50,30 +50,31 @@ configure(subprojects.findAll {it.name != 'jlan'}) {
     sourceCompatibility = 1.7
 
     // Currently CodeNarc fails when used with JDK8.
-    if (!org.gradle.internal.SystemProperties.javaVersion.startsWith('1.8.') && !it.name=='smb-provider') {
-        apply plugin: 'codenarc'
-
-        codenarcTest {
-            onlyIf { false }
-        }
-    }
+//    if (!org.gradle.internal.SystemProperties.javaVersion.startsWith('1.8.') && !it.name=='smb-provider') {
+//        apply plugin: 'codenarc'
+//
+//        codenarcTest {
+//            onlyIf { false }
+//        }
+//    }
 
     repositories {
         jcenter()
         maven { url 'http://repository.codehaus.org' }
         maven { url 'https://oss.jfrog.org/artifactory/repo' }
+        maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot' }
+        maven { url 'https://repository.apache.org/content/repositories/snapshots' }
         mavenLocal()
     }
 
     dependencies {
-        compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.5+'
-        compile 'org.apache.commons:commons-vfs2:2.0'
-        testCompile 'org.apache.ftpserver:ftpserver-core:1.0.6'
-        testCompile 'commons-io:commons-io:2.4'
-        testCompile 'commons-net:commons-net:3.+'
-        testRuntime 'commons-httpclient:commons-httpclient:3.1'
-        testRuntime 'org.slf4j:slf4j-simple:1.7.5'
-
+        compile 'org.apache.jclouds:jclouds-all:1.7.1'
+//	compile 'org.apache.jclouds:jclouds-all:1.8.0-SNAPSHOT'
+        compile 'org.slf4j:slf4j-api:1.7.+'
+        compile 'org.apache.jclouds.driver:jclouds-jsch:1.7.1'
+        compile 'org.apache.jclouds.driver:jclouds-slf4j:1.7.1'
+        testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+        testRuntime 'org.slf4j:slf4j-simple:1.7.+'
     }
 
     task sourcesJar(type: Jar, dependsOn: classes) {

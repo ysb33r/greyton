@@ -1,0 +1,7 @@
+.idea
+TMP
+build
+.gradle
+.DS_Store
+*.iml
+.idea

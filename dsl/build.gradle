@@ -21,19 +21,18 @@ jar {
 
 repositories {
     mavenCentral()
-    maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot' }
-}   
+}
 
 dependencies {
-        compile group: 'org.codehaus.groovy',   name: 'groovy-all', version: '2.2+', classifier: 'indy'
-	compile 'org.apache.jclouds:jclouds-all:1.7.+'	
-    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
-    
+    compile group: 'org.codehaus.groovy',   name: 'groovy-all', version: '2.2+', classifier: 'indy'
 }
 
 test {
-    systemProperties TESTFSREADROOT : "${projectDir}"   
-    systemProperties "ratpack.port" : 9999
+    //systemProperties TESTFSREADROOT : "${projectDir}"
+    if(project.hasProperty('runAWSTests')) {
+        systemProperties 'AWSAccessKeyId' : AWSAccessKeyId
+        systemProperties 'AWSSecretKey' : AWSSecretKey
+    }
 }
 
 uploadArchives  {

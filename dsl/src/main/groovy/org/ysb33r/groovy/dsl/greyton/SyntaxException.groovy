@@ -1,5 +1,6 @@
 // ============================================================================
-// (C) Copyright Schalk W. Cronje 2013
+// Copyright (C) Schalk W. Cronje 2013
+//
 //
 // This software is licensed under the Apache License 2.0
 // See http://www.apache.org/licenses/LICENSE-2.0 for license details
@@ -9,8 +10,23 @@
 // See the License for the specific language governing permissions and limitations under the License.
 //
 // ============================================================================
+package org.ysb33r.groovy.dsl.greyton
 
-rootProject.name = 'greyton'
+import groovy.transform.CompileStatic
 
-include 'dsl'
-//include 'gradle-plugin'
+/**
+ * Created by schalkc on 12/04/2014.
+ */
+@CompileStatic
+class SyntaxException extends Exception {
+
+    /**
+     * @param message
+     */
+    public SyntaxException(String message) {
+        super(message)
+    }
+
+}
+
+
