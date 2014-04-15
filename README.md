@@ -58,7 +58,7 @@ assert cloud.templates.MyTemplate !=null
 cloud {
    stores {
         filesystem ('fs_example') {
-            overrides baseDir : targetDir
+            overrides baseDir : '/path/to/local_store'
         }
     }
 }
