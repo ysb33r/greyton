@@ -46,6 +46,30 @@ class AwsSpec extends Specification {
         expect:
             cloud.farms.test
     }
+
+    @IgnoreIf({ !System.getProperty("AWSAccessKeyId") || !System.getProperty("AWSSecretKey") })
+    def "Must be able to create a template from a farm instance"() {
+        given:
+        cloud {
+            farms {
+                ec2('test') {
+                    credentials System.getProperty("AWSAccessKeyId"), System.getProperty("AWSSecretKey")
+                }
+            }
+
+            templates {
+                test('myTemplate') {
+                    profile smallest
+                    osFamily CENTOS
+
+                }
+            }
+        }
+
+        expect:
+        cloud.templates.myTemplate
+    }
+
 //    def "Must be able to create a filesystem blob store" () {
 //        given:
 //

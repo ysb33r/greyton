@@ -15,7 +15,7 @@ archivesBaseName = 'greyton'
 
 jar {
     manifest {
-        attributes 'Implementation-Title': 'Groovy VFS', 'Implementation-Version': version
+        attributes 'Implementation-Title': 'Greyton', 'Implementation-Version': version
     }
 }
 

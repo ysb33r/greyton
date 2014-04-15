@@ -16,29 +16,25 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.jclouds.ContextBuilder
 import org.jclouds.compute.ComputeServiceContext
+import org.jclouds.compute.domain.TemplateBuilder
 import org.ysb33r.groovy.dsl.greyton.Cloud
-import com.google.inject.Module
+import org.ysb33r.groovy.dsl.greyton.SyntaxException
 
 /**
- * Created by schalkc on 10/04/2014.
+ * Created by schalkc on 13/04/2014.
  */
 @Slf4j
-class ComputeServiceFactory {
-
-    private final ALIASES = [
-            'ec2': 'aws-ec2'
-    ]
+class TemplateFactory {
 
     private Cloud cloud
 
-    ComputeServiceFactory(Cloud cld) {
+    TemplateFactory(Cloud cld) {
         cloud = cld
     }
 
-    //@CompileStatic
-    static void bind(Cloud cld,@DelegatesTo(ComputeServiceFactory) Closure c) {
+    static void bind(Cloud cld,@DelegatesTo(TemplateFactory) Closure c) {
         def newc=c.clone()
-        newc.delegate = new ComputeServiceFactory(cld)
+        newc.delegate = new TemplateFactory(cld)
         newc.resolveStrategy = Closure.DELEGATE_FIRST
         newc()
     }
@@ -46,22 +42,18 @@ class ComputeServiceFactory {
     def methodMissing(final String name,args) {
 
         if(args.size()==2) {
-            String alias = args[0].toString()
-            def object = args[1]
-
-            if(ALIASES[alias]) {
-                alias = ALIASES[alias]
+            if(!cloud.farms[name]) {
+                throw new SyntaxException("'${name}' is not a valid farm and cannot be used as a keyword inside a templates {} block")
             }
+            String alias = args[0].toString()
+            def configObject = args[1]
 
-            switch(object) {
+            switch(configObject) {
                 case Closure:
-                    def context = ContextBuilder.newBuilder(name)
-                    ComputeServiceOptions.bind(name.toString(),context,object)
-                    context.name(alias.toString())
-//                   context.modules( ImmutableSet.<Module> of(new SLF4JLoggingModule()) )
-
-                    log.info "Created farm '${alias.toString()}' of type '${name}'"
-                    return cloud.farmMap[alias.toString()]= context.buildView(ComputeServiceContext.class).computeService
+                    TemplateBuilder tb = this.cloud.farms[name].templateBuilder()
+                    TemplateFactoryOptions.bind(tb,configObject)
+                    log.info "Created template '${alias.toString()}' linked to farm '${name}'"
+                    return cloud.templateMap[alias.toString()]= tb.build()
             }
         }
 
