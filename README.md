@@ -65,3 +65,16 @@ cloud {
 
 assert cloud.stores.fs_example != null
 ```
+
+### Create AWS S3 storage
+```groovy
+cloud {
+   stores {
+        s3 ('fs_example') {
+            credentials "YOUR_AWSAccessKeyId", "YOUR_AWSSecretKey"
+        }
+    }
+}
+
+assert cloud.stores.fs_example
+```
